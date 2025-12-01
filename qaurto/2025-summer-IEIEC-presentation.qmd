@@ -1,0 +1,296 @@
+---
+title: "다중생체신호 기반 인지저하 예측 시각화 어플리케이션 개발"
+subtitle: "The Development of a Visualization Application for Cognitive Decline Prediction Based on Multimodal Biosignals"
+author: 
+  - name: "Boncho Ku, Ph.D. in Statistics"
+    email: secondmoon@kiom.re.kr
+    orcid: 0000-0001-5520-9782 
+    affiliation: 
+       - name: Digital Health Research Division
+         adress: 대전광역시 유성구 유성대로 1672 
+institute: "Korea Institute of Oriental Medicine"
+lightbox: true
+format: 
+  revealjs: 
+    # toc: true
+    logo: assets/ci/CI-KIOM/국영문조합A/국영문조합A_기본표현.jpg
+    footer: "전자공학회 2025년도 하계종합학술대회: 2025-06-24"
+    slide-number: true
+    show-slide-number: all
+    chalkboard:
+      buttons: true
+    multiplex: true
+    theme: [simple, assets/quarto-style-example/monash.scss]
+    controls: true
+    width: 1280
+    height: 1024
+    css: [assets/quarto-style-example/syntax-highlight.css, assets/quarto-style-example/custom.css, assets/quarto-style-example/pacman.css]
+    header-includes: |
+      <link rel="stylesheet" href="/assets/fontawesome-free-6.2.0-web/css/font-awesome.min.css">
+      <script defer src="/assets/fontawesome-free-6.2.0-web/js/all.min.js"></script>    
+    # self-contained: true
+    # embed-resources: true
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+# Introduction
+
+```{r setup-library}
+library(MASS)
+library(reshape2)
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(tidyselect)
+library(tidystats)
+library(glue)
+library(here)
+library(gt)
+library(gtsummary)
+library(kableExtra)
+library(icons)
+
+# xaringanExtra::use_tile_view()
+# xaringanExtra::use_progress_bar(color = "#23373B", location = "bottom")
+# xaringanExtra::use_scribble()
+# xaringanExtra::use_panelset()
+# xaringanExtra::style_panelset_tabs(foreground = "honeydew", background = "seagreen")
+
+```
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` 치매(Dementia)
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   후천적으로 발생하는 정상적 노화의 범위를 벗어난 뇌인지 기능 저하로 정상적인 일상 생활을 유지하지 못하는 상태
+
+-   다양한 병인이 존재하지만 **알츠하이머병(Alzheimer's disease, AD)**에 기인한 치매가 가장 일반적임(전체 케이스 중 60-70%)
+:::
+
+::: {layout-ncol="2"}
+![치매의 종류 및 특성[^1]](assets/IEIE-2025/summerfield-infographic.jpg){width="25%" fig-align="center"}
+
+![치매 주발병 요인[^3]](assets/IEIE-2025/Types-of-dementia-breakdown.jpg){width="20%" fig-align="center"}
+:::
+
+[^1]: https://www.summerfieldredlands.com/understanding-the-umbrella-of-dementia/
+
+[^2]: https://www.summerfieldredlands.com/understanding-the-umbrella-of-dementia/
+
+[^3]: https://hellocare.com.au/what-is-dementia/
+
+[^4]: https://hellocare.com.au/what-is-dementia/
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` 알츠하이머 병(Alzheimer's disease, AD)
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   Amyloid $\beta$ 단백질의 과도 축적으로 생성된 노인반(senile plaque)과 $\tau$ 단백질로 구성된 신경섬유다발의 뇌신경세포 손상에 따른 뇌기능 저하
+:::
+
+![정상인 vs. AD 환자의 뇌 구조 차이[^5]](assets/IEIE-2025/AD-brain.png){width="65%" fig-align="center"}
+
+[^5]: Breijyeh, Zeinab, and Rafik Karaman. "Comprehensive review on Alzheimer’s disease: causes and treatment." Molecules 25.24 (2020): 5789.
+
+[^6]: Breijyeh, Zeinab, and Rafik Karaman. "Comprehensive review on Alzheimer’s disease: causes and treatment." Molecules 25.24 (2020): 5789.
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` AD Continuum
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   AD로 인한 인지기능 저하는 오랜 시간에 걸쳐 매우 느리게 진행
+-   증상진행을 완화하고 삶의 질 유지를 위한 **AD 조기 진단**은 매우 중요
+:::
+
+![](assets/IEIE-2025/AD-continuum.svg){fig-align="center"}
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` AD 선별 및 진단 방법
+
+![](assets/IEIE-2025/AD-diagnosis.svg){width="1000" fig-align="center"}
+
+### `r icons::fontawesome("bullseye", style = "solid")` Motivation
+
+::: {.callout-important appearance="simple" icon="true" style="font-size: 75%;"}
+-   AD 조기 선별을 위한 **비침습적**이고 **비용 효율적인** 방법의 필요성
+
+-   생체신호의 높은 개인 변동성을 보상할만한 기존 임상 검사 도구 활용
+:::
+
+## Purpose of the Study
+
+-   인구학적 정보, 간이정신상태 검사, 비침습적 다중 생체신호 정보를 결합한 인지저하상태 예측모형 개발
+
+-   측정 생체신호 특징 및 예측모형 결과에 대한 웹 기반 인터렉티브 어플리케이션 개발
+
+# Methods
+
+## `r icons::fontawesome("bullseye", style = "solid")` 데이터 속성
+
+### Gwangju Alzheimer's Related Dementia (GARD) Cohort
+
+::: {.callout-important appearance="simple" icon="true" style="font-size: 75%;"}
+-   2014년부터 현재까지 광주 지역 고령 인구 대상 데이터 수집
+
+-   체액 바이오마커, MRI, PET, 신경심리 검사 데이터 수집
+
+-   2022년 기준 15,136명 이상의 데이터 확보
+:::
+
+::: r-stack
+![](assets/IEIE-2025/GARD-cohort-scheme-01.png){.fragment width="1000" fig-align="center"}
+
+![](assets/IEIE-2025/GARD-cohort-scheme-02.png){.fragment width="1000" fig-align="center"}
+:::
+
+## 데이터 속성
+
+### 다중 생체신호 데이터
+
+> KIOM의 GARD 위탁으로 2019-2024년 매년 약 500명에 대한 임상정보 및 다음 생체신호 정보 수집
+
+-   2CH EEG + PPG
+
+    -   Resting State EEG
+
+    -   Attention ERP
+
+    -   Sensory ERP
+
+    -   PPG
+
+-   Eye Tracking
+
+    -   Pro/Anti-saccade Task
+
+    -   Go-Nogo Task
+
+-   Bioimpedance
+
+## 예측모형 개발 및 평가
+
+### Scheme
+
+![](assets/IEIE-2025/model-development-scheme.png){width="1100" fig-align="center"}
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   Regressor의 예측값, classifier의 예측확률에 대한 calibration 적용(예측값, 예측확률에 대한 일치도 개선)
+
+-   Regressor의 예측값에 대한 불확도를 나타내기 위한 90% conformal interval 추정
+
+-   R Tidymodel 패키지를 활용한 파이프라인 자동화 구축
+:::
+
+## 시각화 어플리케이션 설계
+
+
+::::: columns
+::: {.column width="50%" style="font-size: 80%;"}
+### Design 
+
+-  JavaScript 기반으로 구현
+
+-  사용자가 K-MMSE, EEG, Eye-tracking, BIA 검사 및 측정 완료를 전제함. 
+
+-  특징 업로드 시 서버 디렉토리에 저장 및 데이터베이스 적재 
+
+-  데이터베이스와 R 언어 연동을 통해 모형 예측에 필요한 전처리 과정 수행 및 예측모형 결과 도출 후 DB에 적재
+
+-  DB로부터 예측결과와 주요 특징 지표를 추출해 웹페이지에 시각화
+
+:::
+
+
+::: {.column width="50%" style="font-size: 80%;"}
+![](assets/IEIE-2025/viz-app-structure.png){fig-align="center"}
+:::
+
+:::::
+
+
+<!-- 2열로 제시 -->
+
+
+
+# Results
+
+## 모형 성능평가 결과
+
+### 생체나이, SNSB 인지영역 점수, 인지저하상태 최종 예측모형 성능 평가 결과
+
+![](assets/IEIE-2025/model-performance-result.png){width="1000" fig-align="center"}
+
+## 시각화 어플리케이션
+
+-   https://dementia.inno-t.shop/
+
+### 대상자 등록 및 파일 업로드 모듈
+
+![](assets/IEIE-2025/viz-app-register-cap-00.png){width="1200" fig-align="center"}
+
+## 시각화 어플리케이션
+
+### 인지기능 및 인지저하상태 예측 결과 시각화 모듈
+
+::: r-stack
+![](assets/IEIE-2025/viz-app-register-cap-01.png){.fragment width="1500" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-register-cap-02.png){.fragment width="1500" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-register-cap-03.png){.fragment width="1500" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-register-cap-03-02.png){.fragment width="1500" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-register-cap-04.png){.fragment width="1500" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-register-cap-05.png){.fragment width="1500" fig-align="center"}
+:::
+
+## 시각화 어플리케이션
+
+### 결과 설명 모듈
+
+![](assets/IEIE-2025/viz-app-register-cap-06f.png){width="1500" fig-align="center"}
+
+## 시각화 어플리케이션
+
+### 생체신호 특징 분위수 추정 결과 시각화 모듈
+
+::: r-stack
+![](assets/IEIE-2025/viz-app-quant-pred-01.PNG){.fragment width="1200" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-quant-pred-02.PNG){.fragment width="1200" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-quant-pred-03.PNG){.fragment width="1200" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-quant-pred-04.PNG){.fragment width="1200" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-quant-pred-05.PNG){.fragment width="1200" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-quant-pred-06.PNG){.fragment width="1200" fig-align="center"}
+
+![](assets/IEIE-2025/viz-app-quant-pred-07.PNG){.fragment width="1200" fig-align="center"}
+:::
+
+## Conclusion and Discussion
+
+### Contribution
+
+-   다중생체신호와 최소 임상정보를 활용한 인지저하 스크리닝 모형 개발
+
+-   사용자의 예측 결과 이해도를 높이기 위해 예측값, 연령 분위수 등과 같은 정보를 가시화한 시각화 어플리케이션 개발
+
+-   인지건강상태를 쉽게 모니터링 할 수 있고 치매 조기 선별 가능성 제시
+
+### Limitation
+
+-   제한된 인구집단에서 수집한 데이터를 기반으로 구축된 모형 $\rightarrow$ 범용적 확장이 어려움
+
+-   생체신호 측정도구와 실시간 연동 필요

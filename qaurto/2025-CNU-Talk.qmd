@@ -1,0 +1,891 @@
+---
+title: "다중 생체신호를 활용한 인지 저하 상태 예측 알고리즘 개발"
+subtitle: "The Development of a Cognitive Decline Prediction Algorithm Using Multimodal Biosignals"
+author: 
+  - name: "Boncho Ku, Ph.D. in Statistics"
+    email: secondmoon@kiom.re.kr
+    orcid: 0000-0001-5520-9782 
+    affiliation: 
+       - name: Digital Health Research Division
+         adress: 대전광역시 유성구 유성대로 1672 
+institute: "Korea Institute of Oriental Medicine"
+lightbox: true
+format: 
+  revealjs: 
+    # toc: true
+    logo: assets/ci/CI-KIOM/국영문조합A/국영문조합A_기본표현.jpg
+    footer: "충남대학교 데이터사이언스 연구소 설립 기념 세미나"
+    slide-number: true
+    show-slide-number: all
+    chalkboard: 
+      buttons: true    
+    # multiplex: true
+    theme: [simple, assets/quarto-style-example/monash.scss]
+    controls: true
+    width: 1280
+    height: 1024
+    css: [assets/quarto-style-example/syntax-highlight.css, assets/quarto-style-example/custom.css, assets/quarto-style-example/pacman.css]
+    header-includes: |
+      <link rel="stylesheet" href="/assets/fontawesome-free-6.2.0-web/css/font-awesome.min.css">
+      <script defer src="/assets/fontawesome-free-6.2.0-web/js/all.min.js"></script>    
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+# About Presenter
+
+```{r}
+
+```
+
+
+## Biography
+
+<br>
+
+**이전:** 
+
+   - 충남대학교 통계학과 학사 (2004)
+   
+   - 충남대학교 통계학과 석사 (2006)
+   
+   - 충남대학교 통계학과 박사 (2017)
+   
+   - 한국생명공학연구원 연구원 (2005-2006)
+   
+   - 식품의약품안전처 의료기기위원회 통계 전문위원(2020-2023)
+
+
+**현재:** 
+
+  - 한국한의학연구원 디지털헬스연구부 선임연구원
+  
+  - 과학기술연합기술대학원(Univ. of Sicence & Technology, UST) 겸임교수
+
+## 연구 분야 
+
+<br>
+
+- 고처리량(high-throughput) 데이터 분석 (유전체/대사체, 생체신호 등)
+
+- 기계학습 및 딥러닝 기반 예측 및 분류 모형 개발
+
+  - 사상체질 분류 모형 개발
+  - NIRS 기반 비침습적 당뇨 예측모형 개발
+  - **다중 생체신호 기반 인지저하상태 예측 모형 개발**
+  - ...
+
+- 한의 고문헌 기반 Text Mining
+
+- 다중 생체신호 특징의 임상적 연관성 분석 
+
+- 관찰연구, 무작위 대조시험, 코호트 연구 등 임상연구 설계 
+
+
+
+# About KIOM
+
+
+## 대한민국 정부출연 연구기관 조직
+
+<br>
+
+![](assets/2025-CNU-Talk/nst-org.png){width="1280" fig-align="center"}
+
+
+
+
+## 전통의학 중요성 및 현황
+
+<br>
+
+![](assets/2025-CNU-Talk/KIOM-intro.png){width="1000" fig-align="center"}
+
+
+## 일반 현황
+
+
+::: {.callout-important appearance="minimal"}
+
+### `r icons::fontawesome("play", style = "solid")` 설립 목적
+
+- 한의학 이론 및 기술, 한의의료행위 등에 대한 전문적, 체계적 연구개발 수행하고, 
+그 성과 확산을 통해 관련 산업 발전 및 국민건강 증진에 기여
+
+#### `r icons::fontawesome("play", style = "solid")` 주요 임무
+
+- 한의학 연구개말 및 한의기술 인프라 구축
+- 국가 한의학 거점 역할 수행
+
+
+:::
+
+
+![](assets/2025-CNU-Talk/kiom-history.png){width="1200" fig-align="center"}
+
+## KIOM 조직·인력 구성
+
+<br>
+
+![](assets/2025-CNU-Talk/kiom-org-info.png){width="1280" fig-align="center"}
+
+
+## 연구인력 구성 현황 및 연구 인프라
+
+<br>
+
+![](assets/2025-CNU-Talk/kiom-human-infra.png){width="1280" fig-align="center"}
+
+
+
+## 성과 
+
+<br>
+
+![](assets/2025-CNU-Talk/kiom-fruit.png){width="1280" fig-align="center"}
+
+
+## 중점 기술 확보 비전 
+
+<br>
+
+![](assets/2025-CNU-Talk/kiom-vision.png){width="1280" fig-align="center"}
+
+
+## 융합형 기초·원천 연구
+
+경혈 경락 원리 규명을 통한 뇌질환(**치매, 파킨슨 등**) 극복 **원천기술 확보**
+
+<br>
+
+![](assets/2025-CNU-Talk/kiom-strategy-01.png){width="1280" fig-align="center"}
+
+
+## 한의의료기술 디지털 대전환 
+
+**한의학의 디지털 전환**을 통한 미래 바이오·의료 신산업 창출
+
+<br>
+
+![](assets/2025-CNU-Talk/kiom-strategy-02.png){width="1280" fig-align="center"}
+
+
+
+## 한약(韓藥)의 미래가치 창출
+
+차세대 치료기술 및 미래자원 연구를 통해 미래 난제 해결 기여
+
+<br>
+
+![](assets/2025-CNU-Talk/kiom-strategy-03.png){width="1280" fig-align="center"}
+
+# Cognitive Decline Prediction Using Multimodal Biosignals
+
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` 치매(Dementia)
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   후천적으로 발생하는 정상적 노화의 범위를 벗어난 뇌인지 기능 저하로 정상적인 일상 생활을 유지하지 못하는 상태
+
+-   다양한 병인이 존재하지만 **알츠하이머병(Alzheimer's disease, AD)**에 기인한 치매가 가장 일반적임(전체 케이스 중 60-70%)
+:::
+
+::: {layout-ncol="2"}
+![치매의 종류 및 특성[^1]](assets/IEIE-2025/summerfield-infographic.jpg){width="25%" fig-align="center"}
+
+![치매 주발병 요인[^3]](assets/IEIE-2025/Types-of-dementia-breakdown.jpg){width="20%" fig-align="center"}
+:::
+
+[^1]: https://www.summerfieldredlands.com/understanding-the-umbrella-of-dementia/
+
+[^2]: https://www.summerfieldredlands.com/understanding-the-umbrella-of-dementia/
+
+[^3]: https://hellocare.com.au/what-is-dementia/
+
+[^4]: https://hellocare.com.au/what-is-dementia/
+
+
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` 알츠하이머 병(Alzheimer's disease, AD)
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   Amyloid $\beta$ 단백질의 과도 축적으로 생성된 노인반(senile plaque)과 $\tau$ 단백질로 구성된 신경섬유다발의 뇌신경세포 손상에 따른 뇌기능 저하
+:::
+
+![정상인 vs. AD 환자의 뇌 구조 차이[^5]](assets/IEIE-2025/AD-brain.png){width="65%" fig-align="center"}
+
+[^5]: Breijyeh, Zeinab, and Rafik Karaman. "Comprehensive review on Alzheimer’s disease: causes and treatment." Molecules 25.24 (2020): 5789.
+
+[^6]: Breijyeh, Zeinab, and Rafik Karaman. "Comprehensive review on Alzheimer’s disease: causes and treatment." Molecules 25.24 (2020): 5789.
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` AD Continuum
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   AD로 인한 인지기능 저하는 오랜 시간에 걸쳐 매우 느리게 진행
+-   증상진행을 완화하고 삶의 질 유지를 위한 **AD 조기 진단**은 매우 중요
+:::
+
+![](assets/IEIE-2025/AD-continuum.svg){fig-align="center"}
+
+## Background
+
+### `r icons::fontawesome("bullseye", style = "solid")` AD 선별 및 진단 방법
+
+![](assets/IEIE-2025/AD-diagnosis.svg){width="1000" fig-align="center"}
+
+### `r icons::fontawesome("bullseye", style = "solid")` Motivation
+
+::: {.callout-important appearance="simple" icon="true" style="font-size: 75%;"}
+-   AD 조기 선별을 위한 **비침습적**이고 **비용 효율적인** 방법의 필요성
+
+-   생체신호의 높은 개인 변동성을 보상할만한 기존 임상 검사 도구 활용
+
+
+$\rightarrow$ **치매 조기예측을 위한 미세 생체신호 기반 한·양방 융합 기술 개발 과제 시작**(2018 - 2024)
+:::
+
+
+# Multimodal Biosignals 
+
+## Candidate Multimodal Biosignals for Cognitive Decline Prediction
+
+### 2CH EEG + PPG
+
+-   Resting State EEG
+-   Attention ERP
+-   Sensory ERP
+-   PPG
+
+###   Eye Tracking
+
+-   Pro/Anti-saccade Tas
+-   Go-Nogo Task
+
+###   Bioimpedance (InBody)
+
+
+## Electroencephalography (EEG)
+
+##### 뇌의 전기적 활동을 측정하는 비침습적 방법
+
+<br>
+
+![](assets/2025-CNU-Talk/eeg-modality.png){width="1280" fig-align="center"}
+
+::: notes
+EEG는 머리카락이 있는 두피(머리 피부)에 작은 금속판 전극을 붙여 뇌 속에서 생기는 아주 약한 전기 신호를 측정하는 장치입니다. 우리 뇌의 신경세포(뉴런)는 서로 전기 신호로 대화를 합니다. 하지만 중요한 점은:
+
+👉 EEG는 ‘강한 전기 신호’를 보는 것이 아니라
+
+👉 신경세포들이 한꺼번에 움직일 때 생기는 미세한 전류 흐름을 관찰하는 것입니다.
+
+개별 신경세포 하나가 만드는 신호는 너무 작아서 두피까지 도달하지 못하지만,
+수많은 뉴런이 동시에 활동하면 신호가 커져서 두피에서 측정 가능하게 됩니다.
+
+마치 한 두 명이 말하면 안 들리지만, 100명이 동시에 웅성거리면 들리는 것과 비슷합니다. 
+
+
+많은 신경세포가 동시에 활성화되면,
+전류가 뇌 안에서 특정 방향으로 흐르는 물결을 만듭니다.
+
+이 물결은 다음을 지나갑니다: 뇌->뇌척수액->두개골->두피
+
+두개골을 지나면서 신호가 약해지고 퍼지지만, 그래도 두피에 붙인 전극으로 아주 약한 전압 변화(수 μV) 를 측정할 수 있습니다.
+
+두피에 붙인 전극은 전압계(멀티미터) 처럼 "여기와 저기 사이에 전기 차이가 얼마나 있는지"를 재는 장치입니다.
+
+전극들이 기록한 전압 차이의 변화가 바로 뇌파(EEG) 입니다.
+
+뇌파 신호는 너무 약하기 때문에,
+머리 주변에서 생기는 다른 전기 신호에 쉽게 영향을 받습니다.
+
+눈 깜빡임, 눈동자 움직임, 턱·이마 근육 움직임, 심장 박동, 전원(콘센트) 잡음
+
+이런 신호가 섞이면 EEG가 ‘더럽혀지는’데, 이를 아티팩트(artifact) 라고 합니다.
+
+뇌파를 측정할 때 어떤 task를 수행하느냐에 따라 다양한 분석이 가능합니다.
+
+대표적인 task의 예시는 resting state EEG, sensory ERP, attention ERP 등이 있습니다. 
+
+Resting-state EEG는 눈을 감거나 뜨고 가만히 있을 때의 뇌파를 측정합니다. 즉 외부 자극 없이 뇌가 기본적으로 활동하는 상태를 보는 것입니다.
+
+Sensory ERP는 시각이나 청각 자극에 대한 뇌의 반응을 측정합니다. 예를 들어, 화면에 번쩍이는 빛이나 들리는 소리에 대한 뇌파 변화를 분석합니다.
+
+Attention ERP는 주의 집중과 관련된 뇌파 변화를 측정합니다. 특정 자극에 주의를 기울일 때 나타나는 뇌의 선택적 처리 반응울 측정하기 위해 활용됩니다. 
+
+Oddball task: 드문 자극이 나오면 버튼 누르기
+
+Go/No-Go task: 특정 자극은 반응, 다른 자극은 반응 억제
+
+Stroop task: 주의 충돌 상황에서 반응하기
+
+Posner cueing: 주의 이동 평가
+
+
+:::
+
+
+
+
+## Eye Tracking (안구추적 장치)
+
+<br>
+
+##### 눈 움직임을 카메라로 관찰해 어디를 보고 있는지를 추적
+
+
+![](assets/2025-CNU-Talk/eye-track-scheme.png){width="1280" fig-align="center"}
+
+
+
+::: notes
+Eye tracking은 적외선 빛을 눈에 비추고, 카메라가 동공과 각막 반사점의 움직임을 분석해
+사람이 어디를 보는지 계산하는 기술입니다.
+
+Eye tracking은 눈의 움직임을 카메라로 관찰해, 사람이 어디를 보고 있는지를 추정하는 기술입니다. 즉, 눈의 사진을 빠르게 계속 찍어서 → 눈동자의 위치를 계산 → 시선 방향을 알아내는 장치입니다. 
+
+Eye tracking을 통해 다음을 측정할 수 있습니다:
+
+✔ 시선 위치(Gaze point): 화면 어디를 보고 있는지
+✔ 시선 경로(Gaze path): 어떤 순서로 어떤 부분을 봤는지
+✔ 고정(fixation): 일정 시간 머문 위치
+✔ 도약(saccade): 시선이 빠르게 이동하는 구간
+✔ 동공 크기(pupil size): 감정·주의·인지 부하 지표
+✔ 눈깜빡임(blink)
+
+→ 인지과학, 실험심리학, UX 연구, 휴먼팩터, 마케팅 등에서 많이 활용됩니다.
+
+:::
+
+
+## 생체 임피던스 분석기 (Bioimpedance Analyzer)
+
+<br>
+
+##### 인체에 **미세 전류**를 통과시켜 조직 통과 시 생기는 **저항**을 측정
+
+
+![](assets/2025-CNU-Talk/bia-scheme.png){width="1280" fig-align="center"}
+
+
+::: notes
+Bioimpedance Analyzer(BIA)는 인체에 미세한 전류를 흘려보내고, 그 전류가 인체 조직을 통과할 때의 저항(impedance)을 측정하는 장치입니다. 이를 통해 체성분(체수분, 지방량, 근육량 등)을 분석합니다.
+
+인체 조직은 전해질을 포함한 전도성 물질이므로 전류가 흐를 수 있음
+
+전류는 지방보다 수분이 많은 조직(근육, 혈액) 을 더 쉽게 통과
+
+지방 조직은 수분 함량이 낮아 전류 흐름이 어렵기 때문에 저항이 높음
+
+➡️ 따라서 전류 흐름에 대한 저항을 측정하면 체수분 및 제지방량(lean mass) 을 추정할 수 있음.
+
+BIA는 인체에 아주 약한 전류를 흘려보내고, 그 전류가 인체 조직을 통과할 때의 저항(impedance)을 측정하는 장치입니다. 이를 통해 체성분(체수분, 지방량, 근육량 등)을 분석합니다.
+
+BIA는 다음과 같은 원리로 작동합니다:
+
+1. 미세한 전류 주입: BIA 장치는 인체에 아주 약한 교류 전류(보통 50kHz에서 수백 kHz 범위)를 흘려보냅니다. 이 전류는 안전하며, 사람에게 느껴지지 않습니다.
+
+2. 저항 측정: 전류가 인체 조직을 통과할 때, 조직의 전기적 특성에 따라 저항(impedance)이 발생합니다. 지방 조직은 전류를 잘 통과시키지 못해 저항이 높고, 근육 조직은 수분 함량이 높아 저항이 낮습니다. BIA 장치는 이 저항 값을 측정합니다.
+
+3. 체성분 분석: 측정된 저항 값을 바탕으로, BIA 장치는 인체의 체수분, 지방량, 근육량 등을 계산합니다. 이를 위해 다양한 알고리즘과 예측 모델이 사용됩니다.
+
+:::
+
+
+## 예비 연구 (2017-2018)
+
+### 뇌노화지도 사업(경남 의령군)
+
+##### EEG 뇌파를 활용한 치매 분류 모형 개발
+
+:::{.callout-note appearance="minimal"}
+
+#### 인체 항노화 연구소(HASRI) 제공 데이터 기반
+
+- 경상남도 의령군 4개 보건소 및 요양원에서 데이터 수집
+
+- 분석 가능한 대상자 122명 (정상: 87명, 치매: 55명)
+
+- 2CH EEG 뇌파 특징과 인지저하상태 연관성 분석(평균 비교, 로지스틱 회귀분석)
+
+- 치매 분류를 위한 머신러닝 모형 개발
+
+  - LASSO/Elastic net
+  - Random Forest
+  - Gradient Boosting
+
+:::
+
+
+::: notes
+연구 주제: 노인에서 인지 저하 또는 치매 위험을 예측하기 위해 전통적인 간이 인지검사인 Mini‑Mental State Examination (MMSE) 점수 대신 (또는 더해) Electroencephalography (EEG) 기반 뇌파 지표(prefrontal EEG markers)를 활용할 수 있는지 평가.
+
+핵심 주장: 전전두(prefrontal) 영역 EEG 마커는 MMSE 점수보다 치매(dementia) 예측에 더 우수할 수 있으며, 두 방법을 결합하면 예측 정확도를 더욱 높일 수 있다.
+
+👥 연구 대상 및 방법
+
+지역사회에 거주하는 노인 대상. EEG는 안정 상태(resting-state)에서 전전두(prefrontal) 전극을 사용하여 기록. 
+PMC
+
+MMSE를 포함한 전통적 인지 평가는 물론, EEG로부터 도출된 여러 신경전기 지표(neural markers)를 수집.
+
+통계 분석 및 분류 모델을 통해, EEG 지표만으로, MMSE만으로, 또는 EEG + MMSE 조합으로 치매 예측 성능을 비교.
+
+✅ 주요 결과
+
+EEG 지표만 사용한 모델이 MMSE 점수만 사용한 모델보다 치매 예측 능력이 더 뛰어남. 
+PMC
+
+특히, 전전두 EEG 마커가 MMSE 검사보다 더 민감하게 초기 인지 저하 또는 치매 위험을 감지할 수 있다는 증거 제시. 
+PMC
+
+EEG 마커와 MMSE 점수를 결합한 모델이 가장 높은 예측 성능을 보였음 — 즉, 두 방법은 상호 보완적이라는 결론. 
+PMC
+
+🧠 논문의 해석 및 의의
+
+MMSE 같은 간이 인지검사는 널리 쓰이지만, 초기 치매 또는 경도인지저하의 미묘한 변화는 감지하기 어려운 경우가 많음.
+
+EEG는 뇌의 전기 활동을 직접 측정하므로, 인지 기능 변화가 생물학적으로 나타나는 초기 단계를 포착할 수 있는 민감한 바이오마커가 될 수 있음.
+
+특히 전전두 영역은 고위 인지 기능(집행 기능, 주의, 의사결정 등)과 밀접하므로, 인지 저하 초기 변화를 반영하기에 적합.
+
+EEG + MMSE 조합은 비용·시간 대비 효율이 좋은 선별(screening) 도구가 될 수 있어, 지역사회 건강검진, 대규모 코호트 연구, 임상 1차 선별 등에 실용적 가치가 높음.
+
+:::
+
+
+## 예비 연구 (2017-2018)
+
+### 연구 결과 1
+
+::: {.callout-note appearance="minimal"}
+
+**2CH EEG 특징 만으로 치매 분류 가능성 확인**
+
+:::
+
+
+![](assets/2025-CNU-Talk/fruit1.png){width="1280" fig-align="center"}
+
+## 예비 연구 (2017-2018)
+
+### 뇌노화지도 사업(경남 의령군)
+
+##### EEG 배경 뇌파를 활용한 간이정신상태검사(Mini Mental State Examination) 예측 모형 개발 
+
+
+::: {.callout-note appearance="minimal"}
+-   경상남도 의령군 10개 보건소에서 대상자 500명으로부터 생체신호 수집
+-   2CH EEG 뇌파 특징과 K-MMSE 점수 간 상관분석 및 회귀분석
+-   2CH EEG 뇌파 특징 기반 K-MMSE 점수 예측모형 개발 및 평가
+:::
+
+
+![](assets/2025-CNU-Talk/fruit2-scheme.png){width="1280" fig-align="center"}
+
+## 예비 연구 (2017-2018)
+
+### 연구 결과 2 
+
+::: {.callout-note appearance="minimal"}
+-   EEG 뇌파 특징과 MMSE 점수 간 유의한 상관관계 확인
+-   EEG 뇌파 특징 만으로 MMSE 점수 예측 모형 개발 가능성 확인
+:::
+
+
+![](assets/2025-CNU-Talk/fruit2.png){width="1280" fig-align="center"}
+
+
+::: notes
+이 연구는 노년층에서 측정한 전전두(prefrontal) 휴지기(resting-state) EEG 지표가 인지기능(MMSE)과 어떤 관련성을 갖는지 평가한 것입니다. 연구팀은 특히 EEG의 느려짐(slowness)—즉 median frequency, peak frequency, alpha-to-theta ratio(ATR)의 감소—가 인지저하와 연결되는지를 확인하고, 더 나아가 이러한 EEG 지표로 MMSE 점수를 예측할 수 있는지를 분석했습니다.
+
+👥 연구 대상
+
+대한민국 농촌 지역 거주 496명 노인(남 165, 여 331)
+
+모두 eyes-closed 상태에서 Fp1, Fp2에서 EEG 측정
+
+인지기능은 MMSE로 평가
+
+연구진은 MMSE 점수에 따라
+
+T3 (28–30점)
+
+T2 (25–27점)
+
+T1 (≤24점)
+의 세 그룹으로 분류했습니다.
+
+⚡ 주요 EEG 바이오마커
+
+Median Frequency (MDF)
+
+Peak Frequency (PF)
+
+Alpha-to-Theta Ratio (ATR)
+이 세 지표는 모두 “뇌파의 느려짐”을 반영하는 대표적인 휴지기 EEG 지표입니다.
+
+🔍 핵심 결과
+✔ 1. MMSE 점수가 낮아질수록 EEG 지표도 의미 있게 감소
+
+MMSE가 높은 그룹(T3)에서 낮은 그룹(T1)으로 갈수록 MDF, PF, ATR이 모두 일관된 감소를 보였으며,
+남녀 모두에서 통계적으로 매우 유의한 차이가 나타났습니다.
+
+이는 인지기능 저하가 시작되면 전전두 뇌파의 주파수가 늦어진다는 것을 의미합니다.
+
+✔ 2. EEG 지표는 MMSE와 중간 정도의 상관관계
+
+상관분석 결과(MMSE–EEG):
+
+Median frequency ↔ MMSE: ρ ≈ 0.49 (p < 1e−30)
+
+Peak frequency ↔ MMSE: ρ ≈ 0.36 (p < 1e−15)
+
+ATR ↔ MMSE: ρ ≈ 0.37 (p < 1e−16)
+
+즉, 뇌파가 느려질수록 MMSE 점수가 낮아지는 경향이 뚜렷하게 나타났습니다.
+
+✔ 3. EEG만으로도 MMSE 점수 예측이 가능
+
+연구진은 WLS, ridge, elastic net, LASSO 회귀모델을 사용하여
+EEG + 나이·교육·성별을 활용해 MMSE 예측 모델을 구축했습니다.
+
+결과:
+
+예측 RMSE: 2.767~2.685
+
+상관계수(PCC): 0.746~0.758
+
+ICC: 최대 0.757
+
+최종적으로는 LASSO 모델이 가장 우수한 성능을 보였습니다.
+
+즉, 전두 EEG만으로도 MMSE를 비교적 정확하게 예측할 수 있음을 보여준 것입니다.
+
+✔ 4. EEG 슬로잉은 특히 ‘시간·장소 지남력’(orientation)에 더 민감
+
+MMSE 영역별 분석에서
+
+EEG 지표는 ‘시간·장소에 대한 지남력’ 저하와 가장 높은 연관을 보였습니다.
+
+이는 기존 알츠하이머 임상에서 보고되는 인지기능 저하 순서와는 다소 다른 패턴으로,
+전전두 EEG는 초기 지남력 손상을 민감하게 반영할 가능성이 있음이 제시됩니다.
+
+🧠 주요 해석 및 임상적 의미
+
+휴지기 전전두 EEG는 인지저하를 반영하는 민감한 바이오마커
+
+뇌파의 느려짐은 초기 인지 저하와 일관된 관련성
+
+EEG는 비침습적·저비용이므로 대규모 고령층 스크리닝에 적합
+
+특히 MMSE와의 결합 시 조기 선별 능력 향상
+
+📌 결론
+
+전전두 resting-state EEG는 노년층의 인지저하를 잘 반영하며,
+MMSE 점수와 높은 상관성을 보인다.
+EEG 기반 모델은 MMSE 예측에도 효과적이며,
+초기 인지저하 스크리닝 도구로 활용 가치가 크다.
+
+:::
+
+
+## KIOM-조선대 공동 연구(2019-2024)
+
+### `r icons::fontawesome("bullseye", style = "solid")` Gwangju Alzheimer's Related Dementia (GARD) Cohort
+
+::: {.callout-important appearance="simple" icon="true" style="font-size: 75%;"}
+-   2014년부터 현재까지 광주 지역 고령 인구 대상 데이터 수집
+
+-   **체액 바이오마커, MRI, PET, 신경심리검사(SNSB) 등 다양한 데이터 확보**
+
+-   2022년 기준 15,136명 이상의 데이터 확보
+:::
+
+::: r-stack
+![](assets/IEIE-2025/GARD-cohort-scheme-01.png){.fragment width="1000" fig-align="center"}
+
+![](assets/IEIE-2025/GARD-cohort-scheme-02.png){.fragment width="1000" fig-align="center"}
+:::
+
+
+## KIOM-조선대 공동 연구(2019-2024)
+
+### 안구추적 신호 특징의 MCI 예측 가능성 탐색
+
+::: {.callout-note appearance="minimal"}
+Prosaccade/Antisaccade(PS/AS), Go/No-go(GN) 시선추적 과제를 통해 얻은 **안구운동 지표(EM metrics)**의 인지저하상태 예측 가능성 탐색
+
+- GARD 코호트 참가자 중 594명 대상 (정상: 428명, MCI: 166명)
+- MCI는 MRI, PET, 신경심리검사를 종합해 진단 확정
+
+:::
+
+<br>
+
+![](assets/2025-CNU-Talk/fruit3-scheme.png){width="1280" fig-align="center"}
+
+
+
+::: notes
+논문에서 사용한 두 가지 주요 과제(각 30블록 × 3 trial):
+
+1) Prosaccade / Antisaccade 과제
+
+Prosaccade: 자극이 뜨는 방향으로 눈을 빠르게 움직이기
+
+Antisaccade: 자극과 반대 방향으로 눈 움직이기 → 억제(inhibition)·집행기능 평가에 민감
+
+2) Go / No-go 과제
+
+Go: 자극이 뜨면 해당 방향으로 시선 이동
+
+No-go: 움직이지 않고 중심 유지 → 반응 억제 기능 평가
+
+💡 측정된 주요 EM 지표
+
+잠복기(latency) 및 변동성(SD)
+
+응시 시간 및 변동성
+
+anticipatory errors(예측성 오류)
+
+omissions(누락)
+
+inhibition errors(억제 실패: corrected/uncorrected)
+
+
+MCI 환자는 지속 주의력 저하, 시각 억제 기능 저하, 오류 수정 능력 저하, 예측성 반응 증가 등이 특징적으로 나타남.
+
+이 안구운동 변화는 AD 초기 단계에서 나타나는 실행 기능·주의력 저하와 일치.
+
+EM 데이터는 단독으로도 어느 정도 예측력을 가지지만,
+MMSE + EM을 함께 사용했을 때 예측 성능이 크게 향상됨.
+:::
+
+
+## KIOM-조선대 공동 연구(2019-2024)
+
+### 연구 결과 3
+
+::: {.callout-note appearance="minimal"}
+-   안구운동 지표(EM metrics)와 인지저하상태 간 유의한 연관성 확인
+-   안구운동 지표(EM metrics) 기반 MCI 분류 모형 개발 가능성 확인
+-   ET, MMSE, 인구통계정보를 모두 활용한 모델은 임상에서 MCI 조기 진단을 보조할 수 있는 새로운 스크리닝 도구 가능성 제시
+
+:::
+
+![](assets/2025-CNU-Talk/fruit3.png){width="1280" fig-align="center"}
+
+
+## KIOM-조선대 공동 연구(2019-2024)
+
+### 생체임피던스의 MCI 예측인자 활용성 탐색
+
+::: {.callout-note appearance="minimal"}
+-   Bioelectrical Impedance Analysis (BIA) 지표와 경도 인지장애(MCI) 간 연관성 평가
+-   BIA 지표 기반 MCI 분류 모형 개발 가능성 탐색
+-   MMSE 점수와 BIA 지표를 결합한 MCI 분류 모형 개발 및 평가
+:::
+
+
+![](assets/2025-CNU-Talk/fruit4.png){width="1280" fig-align="center"}
+
+
+
+::: notes
+목적: 노년층에서 비침습적이고 간단한 방식으로 경도 인지장애(MCI)를 스크리닝할 수 있는 방법을 제안. 기존의 간이 인지검사인 Mini-Mental State Examination (MMSE) 점수에, 인체의 체성분/체수분 상태를 반영하는 Bioelectrical Impedance Analysis (BIA) 지표를 결합해 MCI 선별력을 높일 수 있는지 평가.
+
+연구 대상:
+
+대한민국, 60세 이상 지역사회 거주자 대상
+
+총 539명에서, 유효 데이터가 있는 470명 포함 (정상 대조군 318명, MCI 진단군 152명) 
+Frontiers
+
+인지 상태 평가는 K-MMSE 및 종합 신경심리검사 배터리(Seoul Neuropsychological Screening Battery-II, SNSB-II) 사용 
+Frontiers
+
+체성분/체수분 측정은 다주파수 BIA 장치(InBody S10, 8-electrode)를 이용하여 팔다리 및 몸통 분절(segmental) 측정 수행 
+Frontiers
+
+분석 방법:
+
+BIA로부터 얻은 여러 지표 + MMSE 점수를 결합한 회귀 및 머신러닝 모델을 제작
+
+모델의 분류 성능을, SNSB-II (종합 신경심리검사) 기반 분류 또는 MMSE 단독, BIA 단독 모델과 비교
+
+평가 지표는 ROC 곡선 아래 면적(AUROC) 중심 
+Frontiers
+
+✅ 주요 결과
+
+MMSE 또는 BIA 단독보다, MMSE + BIA 결합 모델에서 MCI 선별 성능 향상
+
+MMSE 단독 모델의 AUROC: 남성 0.723, 여성 0.622, 전체 0.663 
+Frontiers
+
+BIA 단독 모델의 AUROC: 남성 0.640, 여성 0.615 수준 
+Frontiers
+
+MMSE + BIA 결합 모델의 AUROC: 약 0.790 (성별 구분 시 0.773) — MMSE 또는 BIA 단독보다 우수 
+Frontiers
+
+이 성능은 일부 머신러닝 기법으로 구축한 모델 수준과 유사하거나 더 나은 결과 보여줌 
+Frontiers
+
+모든 정보를 포함한 모델의 분류 성능이 일반 신경심리검사(SNSB-II) 기반 모델에 근접
+
+SNSB-II memory domain 기반 AUROC: 남성 0.840, 여성 0.752, 전체 0.803 
+Frontiers
+
+MMSE + BIA 모델은 약 0.79 수준으로, 임상적으로 꽤 현실적인 스크리닝 도구 가능성 시사 
+Frontiers
+
+의의: BIA + MMSE 결합은
+
+시간과 비용이 많이 드는 종합 신경심리검사 대신
+
+비교적 간단하고 빠르며 비침습적으로 MCI를 선별할 수 있는 실용적 대안이 될 수 있음.
+
+특히 대규모 인구 집단 또는 1차 의료/건강검진 환경에서 유용할 가능성 높음.
+
+✨ 저자가 제시한 함의 및 한계
+
+장점:
+
+휴대용 BIA 장비를 사용 → 손쉽고 빠른 체성분/체수분 측정 가능
+
+MMSE는 이미 널리 쓰이는 간이 인지검사 → 추가 장비 없이 쉽게 결합 가능
+
+낮은 비용, 비침습성, 신속성으로 인구기반 스크리닝에 적합
+
+한계:
+
+종합 신경심리검사(SNSB-II)처럼 인지의 세부 도메인별 평가를 대신할 수 없음 — 어디까지나 선별(screening) 목적.
+
+BIA 지표는 체성분, 수분 상태, 영양상태 등 다양한 요인의 영향을 받으므로, 단순 해석에 주의 필요.
+
+연구 대상이 한국 노년 인구에 국한 — 다른 인구 집단 일반화 시 재검증 필요
+
+향후 제안:
+
+장기 추적 연구(longitudinal study)로 BIA+MMSE 모델이 실제로 치매로의 진행을 예측하는지 확인
+
+다른 비침습적 바이오마커 (예: 눈동작, gait, 심박변동 등) 와 결합하여 다중 모달 예측 모델 개발
+
+🧑‍⚕️ 임상적/실용적 의미
+
+이 논문은 치매 전단계 또는 인지저하 가능성이 있는 노인 집단을 대상으로,
+비용·시간·접근성에서 부담이 적은 BIA + MMSE 조합 스크리닝 도구를 제안한 연구입니다.
+
+이는 특히:
+
+공공 보건검진
+
+보건소 또는 1차 의료기관
+
+노인 건강검진 프로그램
+
+처럼 대규모 인구를 대상으로 한 초기 선별이 필요한 환경에서 유용할 수 있습니다.
+
+또한,
+
+완전한 진단 이전에
+
+추가 정밀 신경심리검사나 영상검사가 필요한 대상자를 효율적으로 선정할 수 있다는 점에서 실용성이 큽니다.
+:::
+
+
+## 통합 예측모형 개발 및 평가
+
+### Scheme
+
+![](assets/IEIE-2025/model-development-scheme.png){width="1000" fig-align="center"}
+
+::: {.callout-note appearance="simple" icon="true" style="font-size: 75%;"}
+-   Regressors [생체나이, SNSB II 뇌기능 점수(주의/집중, 전두엽 기능, 기억, 언어, 시공간 지각 기능)] 및 classifier (인지저하상태 예측 모형)에 대해 calibration 적용 
+-   SNSB II 뇌기능 예측 점수에 대한 레이더 도표 표현
+-   Regressor의 예측값에 대한 불확도를 나타내기 위한 90% conformal interval 추정
+-   R Tidymodel 패키지를 활용한 파이프라인 자동화 구축
+:::
+
+
+
+
+## 통합 예측모형 개발 및 평가
+
+#### 대상자 개별 생체신호 특징 시각화 
+
+:::{.callout-note appearance="minimal"}
+
+주요 생체신호 특징의 실제 측정값이 수집한 전체 데이터에서 성별, 연령, 교육수준에 따라 어느 정도에 위치하는 지 표현
+
+-  수집 데이터 기반 성별 및 연령에 따른 개별 특징에 대한 분위수 회귀모형(quantile regression) 실시 
+
+-  각 생체신호 특징에 대해 대상자의 측정값이 속하는 분위수(%) 산출 및 시각화
+
+:::
+
+
+![](assets/2025-CNU-Talk/fruit5.png){width="1000" fig-align="center"}
+
+
+
+## 시각화 어플리케이션 설계
+
+::::: columns
+::: {.column width="50%" style="font-size: 80%;"}
+### Design
+
+-   JavaScript 기반으로 구현
+
+-   사용자가 K-MMSE, EEG, Eye-tracking, BIA 검사 및 측정 완료를 전제함.
+
+-   특징 업로드 시 서버 디렉토리에 저장 및 데이터베이스 적재
+
+-   데이터베이스와 R 언어 연동을 통해 모형 예측에 필요한 전처리 과정 수행 및 예측모형 결과 도출 후 DB에 적재
+
+-   DB로부터 예측결과와 주요 특징 지표를 추출해 웹페이지에 시각화
+:::
+
+::: {.column width="50%" style="font-size: 80%;"}
+![](assets/IEIE-2025/viz-app-structure.png){fig-align="center"}
+:::
+:::::
+
+
+
+## 모형 성능평가 결과
+
+### 생체나이, SNSB 인지영역 점수, 인지저하상태 최종 예측모형 성능 평가 결과
+
+![](assets/IEIE-2025/model-performance-result.png){width="1000" fig-align="center"}
+
+## 시각화 어플리케이션
+
+#### https://dementia.inno-t.shop/
+
+
+::: {layout="[-1,1,-1]" layout-align="center"}
+{{< video assets/2025-CNU-Talk/contents-video.mp4 width="1200" height="800" start="100" >}}
+:::
+
+
+
+
+
+
+
+
+
+
