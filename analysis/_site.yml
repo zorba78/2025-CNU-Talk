@@ -12,7 +12,7 @@ navbar:
   - text: Talks
     menu:
     - text: CNU Talk
-      href: CNU-Talk-2025.html
+      href: 2025-CNU-Talk.html
 output:
   workflowr::wflow_html:
     toc: yes
