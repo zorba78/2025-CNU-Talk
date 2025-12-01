@@ -9,6 +9,10 @@ navbar:
     href: about.html
   - text: License
     href: license.html
+  - text: Talks
+    menu:
+    - text: CNU Talk
+      href: CNU-Talk-2025.html
 output:
   workflowr::wflow_html:
     toc: yes
